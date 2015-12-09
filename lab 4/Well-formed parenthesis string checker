@@ -1,0 +1,40 @@
+// Parenthesis matcher Turing Machine
+// test tapes and checkoff information
+symbols ( ) X 0 1
+states S1 S2 S3 // list of state names, first is starting state
+tape test1 (
+result1 test1 0
+tape test2 )
+result1 test2 0
+tape test3 ( )
+result1 test3 1
+tape test4 ) (
+result1 test4 0
+tape test5 ( ) ( ) ( ( ( ) ) ( ) ) ) ( )
+result1 test5 0
+tape test6 ( ) ( ( ( ) ( ( ( ) ) ( ) ) )
+result1 test6 0
+tape test7 ( ) ( ( ) ( ( ( ) ) ( ) ) )
+result1 test7 1
+// specify transistions: action state symbol state' write move
+//    state = the current state of the FSM
+//    symbol = the symbol read from the current cell
+//    state' = state on the next cycle 
+//    write = symbol to be written into the current cell
+//    move = tape movement ("l" = left, "r" = right, "-"=stay put)
+//           old  R              new  W  N
+action   S1  (                 S1    (   l
+action   S1  )                 S2    X   r
+action   S1  X                S1    X   l
+action   S1  -                 S3    -    r
+action   S2  (                 S1    X   l
+action   S2  X                S2    X   r
+action   S2   -             *halt*  0   -
+action   S3  (              *halt* 0   - 
+action   S3  X                S3   X   r
+action   S3   -              *halt* 1  -
+
+
+
+
+

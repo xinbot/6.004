@@ -1,0 +1,160 @@
+.include beta.uasm
+.include lab7macros.uasm
+.include lab7checkoff.uasm
+
+.macro sext (RA, M, RB) {
+       SHLC(RA, 31-M, RB)			
+       SRAC(RB, 31-M, RB)			
+}
+
+regs: RESERVE(32) 				 | Array used to store register contents
+
+UI:
+	save_all_regs(regs)
+	
+	LD(xp,-4,r0) 				 | illegal instruction
+	extract_field(r0, 31, 26, r1)| extract opcode, bits 31:26
+	
+	CMPEQC(r1,0b010000,r2) 	 	 | OPCODE=010000?
+	BT(r2, LDB_HANDLER) 		 | yes, handle the LDB instruction.
+	
+	CMPEQC(r1,0b010001,r2) 	 	 | OPCODE=010001?
+	BT(r2, STB_HANDLER) 		 | yes, handle the STB instruction.
+	
+	LD(r31,regs,r0) 
+	LD(r31,regs+4,r1) 
+	LD(r31,regs+8,r2)
+	BR(_IllegalInstruction)
+	
+LDB_HANDLER:
+	
+	extract_field(r0, 25, 21, r1) | extract rc field
+	MULC(r1,  4, r1) 			  | convert to byte offset into regs array
+	
+	extract_field(r0, 20, 16, r2) | extract ra field
+	MULC(r2,  4, r2) 			  | convert to byte offset into regs array
+	LD(r2, regs, r4) 			  | r4 <- regs[ra]
+	
+	extract_field(r0, 15,  0, r3) | extract literal field
+	
+	sext(r3, 15, r3)			  | signed extend to 32-bit
+	ADD(r4, r3, r3)				  | EA ← Reg[Ra] + SEXT(literal)
+	LD(r3, 0, r4)				  | MDATA ← Mem[EA]
+	
+	extract_field(r3, 1, 0, r2) | extract EA[1:0] field
+	
+	CMPEQC(r2,0,r5) 		 	| if EA1:0 = 0b00 then MDATA7:0
+	BT(r5, if_00)
+	CMPEQC(r2,1,r5) 		 	| if EA1:0 = 0b01 then MDATA15:8
+	BT(r5, if_01)
+	CMPEQC(r2,2,r5) 		 	| if EA1:0 = 0b10 then MDATA23:16
+	BT(r5, if_02)
+	CMPEQC(r2,3,r5) 		 	| if EA1:0 = 0b11 then MDATA31:24
+	BT(r5, if_03)
+	
+if_00:
+	LD(r1, regs, r6) 			| r6 <- regs[rc]
+	MULC(r6, 0, r6)	
+	extract_field(r4, 7, 0, r4) | extract MDATA[7:0] field
+	ADD(r6, r4, r6)
+	ST(r6, regs, r1)
+	BR(end_if00)
+	
+if_01:
+	LD(r1, regs, r6)
+	MULC(r6, 0, r6)	
+	extract_field(r4, 15, 8, r4) | extract MDATA[15:8] field
+	ADD(r6, r4, r6)
+	ST(r6, regs, r1)
+	BR(end_if00)
+	
+if_02:
+	LD(r1, regs, r6)
+	MULC(r6, 0, r6)	
+	extract_field(r4, 23, 16, r4) | extract MDATA[23:16] field
+	ADD(r6, r4, r6)
+	ST(r6, regs, r1)
+	BR(end_if00)
+	
+if_03:
+	LD(r1, regs, r6)
+	MULC(r6, 0, r6)	
+	extract_field(r4, 31, 24, r4) | extract MDATA[31:24] field
+	ADD(r6, r4, r6)
+	ST(r6, regs, r1)
+	
+end_if00:
+	restore_all_regs(regs)
+	JMP(xp)
+	
+
+STB_HANDLER:
+	extract_field(r0, 20, 16, r1) | extract ra field
+	MULC(r1,  4, r1) 			  | convert to byte offset into regs array
+	LD(r1, regs, r1) 			  | r1 <- regs[ra]
+	
+	extract_field(r0, 15,  0, r2) | extract literal field
+	sext(r2, 15, r2)			  | r2 <- signed extend to 32-bit
+	
+	ADD(r1, r2, r1)				  | r1 EA <- Reg[Ra] + SEXT(literal)
+	
+	LD(r1, 0, r3)				  | r3 MDATA <- Mem[EA]
+	
+	extract_field(r1, 1, 0, r4)	  | r4 EA[1:0]
+	
+	extract_field(r0, 25, 21, r5) | extract rc field
+	MULC(r5,  4, r5) 			  | convert to byte offset into regs array
+	LD(r5, regs, r5)			  | r5 Reg[rc]
+	extract_field(r5, 7, 0, r5)   | r5 Reg[rc][7:0]
+	
+	
+	CMPEQC(r4,0,r6) 		 	  | if EA1:0 = 0b00 then MDATA7:0
+	BT(r6, if_000)
+	CMPEQC(r4,1,r6) 		 	  | if EA1:0 = 0b01 then MDATA15:8
+	BT(r6, if_001)
+	CMPEQC(r4,2,r6) 		 	  | if EA1:0 = 0b10 then MDATA23:16
+	BT(r6, if_002)
+	CMPEQC(r4,3,r6) 		 	  | if EA1:0 = 0b11 then MDATA31:24
+	BT(r6, if_003)
+
+if_000:
+	SHRC(r3, 8, r3)
+	SHLC(r3, 8, r3)
+	ADD(r3, r5, r3)
+	ST(r3, 0, r1)
+	BR(end_if01)
+	
+if_001:
+	ADDC(r3, 0, r7)
+	SHRC(r3, 16, r3)
+	SHLC(r3, 16, r3)
+	SHLC(r7, 24, r7)
+	SHRC(r7, 24, r7)
+	ADD(r3, r7, r7)
+	SHLC(r5, 8, r5)
+	ADD(r7, r5, r7)
+	ST(r7, 0, r1)
+	BR(end_if01)
+	
+if_002:
+	ADDC(r3, 0, r7)
+	SHRC(r3, 24, r3)
+	SHLC(r3, 24, r)
+	SHLC(r7, 16, r7)
+	SHRC(r7, 16, r7)
+	ADD(r3, r7, r7)
+	SHLC(r5, 16, r5)
+	ADD(r7, r5, r7)
+	ST(r7, 0, r1)
+	BR(end_if01)
+	
+if_003:
+	SHLC(r3, 8, r3)
+	SHRC(r3, 8, r3)
+	SHLC(r5, 24, r5)
+	ADD(r3, r5, r3)
+	ST(r3, 0, r1)
+	
+end_if01:
+	restore_all_regs(regs)
+	JMP(xp)

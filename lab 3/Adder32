@@ -1,0 +1,121 @@
+.include "nominal.jsim" 
+.include "stdcell.jsim" 
+.include "lab3checkoff_6.jsim"
+
+*Adder/Substractor unit
+.subckt adder32 ALUFN[0] A[31:0] B[31:0] s[31:0] z v n
+Xxr B[31:0] ALUFN[0]#32 C[31:0] xor2 
+Xfa0 A[0] C[0] ALUFN[0] s[0] O[0] FA
+Xfa30 A[1:30] C[1:30] O[0:29] s[1:30] O[1:30] FA
+Xfa31 A[31] C[31] O[30] S[31] O[31] FA
+*implementing function z
+Xor04 s[0:3] r0 or4
+Xor14 s[4:7] r1 or4
+Xor24 s[8:11] r2 or4
+Xor34 s[12:15] r3 or4
+Xor44 s[16:19] r4 or4
+Xor54 s[20:23] r5 or4
+Xor64 s[24:27] r6 or4
+Xor74 s[28:31] r7 or4
+Xor84 r[0:3] r8 or4
+Xor94 r[4:7] r9 or4
+Xor02 r8 r9 r10 or2
+Xin03 r10 z inverter
+*implementing function v
+Xin00 s[31] ns31 inverter
+Xand00 A[31] c[31] ns31 an1 and3
+Xin01 A[31] na31 inverter
+Xin02 c[31] nc31 inverter
+Xand01 na31 nc31 s[31] an2 and3
+Xor12 an1 an2 v or2
+*implementing function n
+Xbuf00 S[31] n buffer
+.ends
+
+*Fulladder unit
+.subckt FA a b ci s co
+Xxr0 a b 1 xor2
+Xxr1 1 ci s xor2
+Xad0 a b a1 and2
+Xad1 a ci a2 and2
+Xad2 b ci a3 and2
+Xor0 a1 a2 o1 or2
+Xor1 a3 o1 co or2
+.ends
+
+*Compare unit
+.subckt compare32 ALUFN[2:1] z v n cmp[31:0]
+Xbuf00 0#31 cmp[31:1] buffer
+Xxor00 n v d1 xor2
+Xor00 z d1 d3 or2
+Xmux ALUFN[2] ALUFN[1] 0 d1 z d3 cmp[0] mux4
+.ends
+
+*Boolean unit
+.subckt boole32 ALUFN[3:0] A[31:0] B[31:0] boole[31:0]
+Xmux32 A[31:0] B[31:0] ALUFN[0]#32 ALUFN[1]#32 ALUFN[2]#32 ALUFN[3]#32 boole[31:0] mux4
+.ends
+
+.subckt shift32 ALUFN[1:0] A[31:0] B[4:0] shift[31:0]
+*Shift left arithmetic
+XSL040 B[4]#16 A[31:16] A[15:0] W[31:16] mux2
+XSL041 B[4]#16 A[15:0] 0#16 W[15:0] mux2
+XSL030 B[3]#8 W[31:24] W[23:16] X[31:24] mux2
+XSL031 B[3]#16 W[23:8] W[15:0] X[23:8] mux2
+XSL032 B[3]#8 W[7:0] 0#8 X[7:0] mux2
+XSL020 B[2]#4 X[31:28] X[27:24] Y[31:28] mux2
+XSL021 B[2]#24 X[27:4] X[23:0] Y[27:4] mux2
+XSL022 B[2]#4 X[3:0] 0#4 Y[3:0] mux2
+XSL010 B[1]#2 Y[31:30] Y[29:28] Z[31:30] mux2
+XSL011 B[1]#28 Y[29:2] Y[27:0] Z[29:2] mux2
+XSL012 B[1]#2 Y[1:0] 0#2 Z[1:0] mux2
+XSL000 B[0] Z[31] Z[30] SL[31] mux2
+XSL001 B[0]#30 Z[30:1] Z[29:0] SL[30:1] mux2
+XSL002 B[0] Z[0] 0 SL[0] mux2
+*Shift right arithmetic
+XSR040 B[4]#16 A[31:16] 0#16 P[31:16] mux2
+XSR041 B[4]#16 A[15:0] A[31:16] P[15:0] mux2
+XSR030 B[3]#8 P[31:24] 0#8 Q[31:24] mux2
+XSR031 B[3]#16 P[23:8] P[31:16] Q[23:8] mux2
+XSR032 B[3]#8 P[7:0] P[15:8] Q[7:0] mux2
+XSR020 B[2]#4 Q[31:28] 0#4 T[31:28] mux2
+XSR021 B[2]#24 Q[27:4] Q[31:8] T[27:4] mux2
+XSR022 B[2]#4 Q[3:0] Q[7:4] T[3:0] mux2
+XSR010 B[1]#2 T[31:30] 0#2 E[31:30] mux2
+XSR011 B[1]#28 T[29:2] T[31:4] E[29:2] mux2
+XSR012 B[1]#2 T[1:0] T[3:2] E[1:0] mux2
+XSR000 B[0] E[31] 0 SR[31] mux2
+XSR001 B[0]#30 E[30:1] E[31:2] SR[30:1] mux2
+XSR002 B[0] E[0] E[1] SR[0] mux2
+*shift right with sign extension
+XSRS040 B[4]#16 A[31:16] A[31]#16 PP[31:16] mux2
+XSRS041 B[4]#16 A[15:0] A[31:16] PP[15:0] mux2
+XSRS030 B[3]#8 PP[31:24] PP[31]#8 QQ[31:24] mux2
+XSRS031 B[3]#16 PP[23:8] PP[31:16] QQ[23:8] mux2
+XSRS032 B[3]#8 PP[7:0] PP[15:8] QQ[7:0] mux2
+XSRS020 B[2]#4 QQ[31:28] QQ[31]#4 TT[31:28] mux2
+XSRS021 B[2]#24 QQ[27:4] QQ[31:8] TT[27:4] mux2
+XSRS022 B[2]#4 QQ[3:0] QQ[7:4] TT[3:0] mux2
+XSRS010 B[1]#2 TT[31:30] TT[31]#2 EE[31:30] mux2
+XSRS011 B[1]#28 TT[29:2] TT[31:4] EE[29:2] mux2
+XSRS012 B[1]#2 TT[1:0] TT[3:2] EE[1:0] mux2
+XSRS000 B[0] EE[31] EE[31] SRA[31] mux2
+XSRS001 B[0]#30 EE[30:1] EE[31:2] SRA[30:1] mux2
+XSRS002 B[0] EE[0] EE[1] SRA[0] mux2
+*Operation logic
+Xlog ALUFN[0]#32 ALUFN[1]#32 SL[31:0] SR[31:0] 0#32 SRA[31:0] shift[31:0] mux4
+.ends
+
+.subckt alu ALUFN[5:0] A[31:0] B[31:0] alu[31:0] z v n
+Xad ALUFN[0] A[31:0] B[31:0] s[31:0] z v n adder32
+Xbo ALUFN[3:0] A[31:0] B[31:0] boole[31:0] boole32
+Xsh ALUFN[1:0] A[31:0] B[4:0] shift[31:0] shift32
+Xcm ALUFN[2:1] z v n cmp[31:0] compare32
+Xmu ALUFN[4]#32 ALUFN[5]#32 s[31:0] boole[31:0] shift[31:0] cmp[31:0] alu[31:0] mux4 
+.ends
+
+
+
+
+
+
