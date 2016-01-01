@@ -1,0 +1,194 @@
+*arithmetic unit
+.subckt arith ALUFN[1:0] A[31:0] B[31:0] OUT[31:0] z v n
+Xadder ALUFN[0] A[31:0] B[31:0] S[31:0] z v n adder32
+Xmultiplier A[31:0] B[31:0] P[31:0] multiply32
+Xmx ALUFN[1]#32 S[31:0] P[31:0] OUT[31:0] mux2 
+.ends
+
+*Multiply unit
+.subckt multiply32 A[31:0] B[31:0] P[31:0]
+*partial product
+Xand00 A[31:0] B[0]#32  paa[31:0] and2
+Xand01 A[31:0] B[1]#32  pab[31:0] and2
+Xand02 A[31:0] B[2]#32  pac[31:0] and2
+Xand03 A[31:0] B[3]#32  pad[31:0] and2
+Xand04 A[31:0] B[4]#32  pae[31:0] and2
+Xand05 A[31:0] B[5]#32  paf[31:0] and2
+Xand06 A[31:0] B[6]#32  pag[31:0] and2
+Xand07 A[31:0] B[7]#32  pah[31:0] and2
+Xand08 A[31:0] B[8]#32  pai[31:0] and2
+Xand09 A[31:0] B[9]#32  paj[31:0] and2
+Xand10 A[31:0] B[10]#32 pak[31:0] and2
+Xand11 A[31:0] B[11]#32 pal[31:0] and2
+Xand12 A[31:0] B[12]#32 pam[31:0] and2
+Xand13 A[31:0] B[13]#32 pan[31:0] and2
+Xand14 A[31:0] B[14]#32 pao[31:0] and2
+Xand15 A[31:0] B[15]#32 pap[31:0] and2
+Xand16 A[31:0] B[16]#32 paq[31:0] and2
+Xand17 A[31:0] B[17]#32 par[31:0] and2
+Xand18 A[31:0] B[18]#32 pas[31:0] and2
+Xand19 A[31:0] B[19]#32 pat[31:0] and2
+Xand20 A[31:0] B[20]#32 pau[31:0] and2
+Xand21 A[31:0] B[21]#32 pav[31:0] and2
+Xand22 A[31:0] B[22]#32 paw[31:0] and2
+Xand23 A[31:0] B[23]#32 pax[31:0] and2
+Xand24 A[31:0] B[24]#32 pay[31:0] and2
+Xand25 A[31:0] B[25]#32 paz[31:0] and2
+Xand26 A[31:0] B[26]#32 pba[31:0] and2
+Xand27 A[31:0] B[27]#32 pbb[31:0] and2
+Xand28 A[31:0] B[28]#32 pbc[31:0] and2
+Xand29 A[31:0] B[29]#32 pbd[31:0] and2
+Xand30 A[31:0] B[30]#32 pbe[31:0] and2
+Xand31 A[31:0] B[31]#32 pbf[31:0] and2
+
+Xadd00 0 paa[31:0] pab[30:0] 0   aaa[31:0] zaaa vaaa naaa adder32
+Xadd01 0 aaa[31:0] pac[29:0] 0#2 aab[31:0] zaab vaab naab adder32 
+Xadd02 0 aab[31:0] pad[28:0] 0#3 aac[31:0] zaac vaac naac adder32
+Xadd03 0 aac[31:0] pae[27:0] 0#4 aad[31:0] zaad vaad naad adder32
+Xadd04 0 aad[31:0] paf[26:0] 0#5 aae[31:0] zaae vaae naae adder32
+Xadd05 0 aae[31:0] pag[25:0] 0#6 aaf[31:0] zaaf vaaf naaf adder32
+Xadd06 0 aaf[31:0] pah[24:0] 0#7 aag[31:0] zaag vaag naag adder32
+Xadd07 0 aag[31:0] pai[23:0] 0#8 aah[31:0] zaah vaah naah adder32
+Xadd08 0 aah[31:0] paj[22:0] 0#9 aai[31:0] zaai vaai naai adder32
+Xadd09 0 aai[31:0] pak[21:0] 0#10 aaj[31:0] zaaj vaaj naaj adder32
+Xadd10 0 aaj[31:0] pal[20:0] 0#11 aak[31:0] zaak vaak naak adder32
+Xadd11 0 aak[31:0] pam[19:0] 0#12 aal[31:0] zaal vaal naal adder32
+Xadd12 0 aal[31:0] pan[18:0] 0#13 aam[31:0] zaam vaam naam adder32
+Xadd13 0 aam[31:0] pao[17:0] 0#14 aan[31:0] zaan vaan naan adder32
+Xadd14 0 aan[31:0] pap[16:0] 0#15 aao[31:0] zaao vaao naao adder32
+Xadd15 0 aao[31:0] paq[15:0] 0#16 aap[31:0] zaap vaap naap adder32
+Xadd16 0 aap[31:0] par[14:0] 0#17 aaq[31:0] zaaq vaaq naaq adder32
+Xadd17 0 aaq[31:0] pas[13:0] 0#18 aar[31:0] zaar vaar naar adder32
+Xadd18 0 aar[31:0] pat[12:0] 0#19 aas[31:0] zaas vaas naas adder32
+Xadd19 0 aas[31:0] pau[11:0] 0#20 aat[31:0] zaat vaat naat adder32
+Xadd20 0 aat[31:0] pav[10:0] 0#21 aau[31:0] zaau vaau naau adder32
+Xadd21 0 aau[31:0] paw[9:0]  0#22 aav[31:0] zaav vaav naav adder32
+Xadd22 0 aav[31:0] pax[8:0]  0#23 aaw[31:0] zaaw vaaw naaw adder32
+Xadd23 0 aaw[31:0] pay[7:0]  0#24 aax[31:0] zaax vaax naax adder32
+Xadd24 0 aax[31:0] paz[6:0]  0#25 aay[31:0] zaay vaay naay adder32
+Xadd25 0 aay[31:0] pba[5:0]  0#26 aaz[31:0] zaaz vaaz naaz adder32
+Xadd26 0 aaz[31:0] pbb[4:0]  0#27 aba[31:0] zaba vaba naba adder32
+Xadd27 0 aba[31:0] pbc[3:0]  0#28 abb[31:0] zabb vabb nabb adder32
+Xadd28 0 abb[31:0] pbd[2:0]  0#29 abc[31:0] zabc vabc nabc adder32
+Xadd29 0 abc[31:0] pbe[1:0]  0#30 abd[31:0] zabd vabd nabd adder32
+
+Xadd31 0 abd[31:0] pbf[0] 0#31 P[31:0] zabe vabe nabe adder32
+.ends
+
+*Adder/Substractor unit
+.subckt adder32 ALUFN[0] A[31:0] B[31:0] s[31:0] z v n
+Xxr B[31:0] ALUFN[0]#32 C[31:0] xor2 
+Xfa0 A[0] C[0] ALUFN[0] s[0] O[0] FA
+Xfa30 A[1:30] C[1:30] O[0:29] s[1:30] O[1:30] FA
+Xfa31 A[31] C[31] O[30] S[31] O[31] FA
+*implementing function z
+Xor04 s[0:3] r0 or4
+Xor14 s[4:7] r1 or4
+Xor24 s[8:11] r2 or4
+Xor34 s[12:15] r3 or4
+Xor44 s[16:19] r4 or4
+Xor54 s[20:23] r5 or4
+Xor64 s[24:27] r6 or4
+Xor74 s[28:31] r7 or4
+Xor84 r[0:3] r8 or4
+Xor94 r[4:7] r9 or4
+Xor02 r8 r9 r10 or2
+Xin03 r10 z inverter
+*implementing function v
+Xin00 s[31] ns31 inverter
+Xand00 A[31] c[31] ns31 an1 and3
+Xin01 A[31] na31 inverter
+Xin02 c[31] nc31 inverter
+Xand01 na31 nc31 s[31] an2 and3
+Xor12 an1 an2 v or2
+*implementing function n
+Xbuf00 S[31] n buffer
+.ends
+
+*Fulladder unit
+.subckt FA a b ci s co
+Xxr0 a b 1 xor2
+Xxr1 1 ci s xor2
+Xad0 a b a1 and2
+Xad1 a ci a2 and2
+Xad2 b ci a3 and2
+Xor0 a1 a2 o1 or2
+Xor1 a3 o1 co or2
+.ends
+
+*Compare unit
+.subckt compare32 ALUFN[2:1] z v n cmp[31:0]
+Xbuf00 0#31 cmp[31:1] buffer
+Xxor00 n v d1 xor2
+Xor00 z d1 d3 or2
+Xmux ALUFN[2] ALUFN[1] 0 d1 z d3 cmp[0] mux4
+.ends
+
+*Boolean unit
+.subckt boole32 ALUFN[3:0] A[31:0] B[31:0] boole[31:0]
+Xmux32 A[31:0] B[31:0] ALUFN[0]#32 ALUFN[1]#32 ALUFN[2]#32 ALUFN[3]#32 boole[31:0] mux4
+.ends
+
+.subckt shift32 ALUFN[1:0] A[31:0] B[4:0] shift[31:0]
+*Shift left arithmetic
+XSL040 B[4]#16 A[31:16] A[15:0] W[31:16] mux2
+XSL041 B[4]#16 A[15:0] 0#16 W[15:0] mux2
+XSL030 B[3]#8 W[31:24] W[23:16] X[31:24] mux2
+XSL031 B[3]#16 W[23:8] W[15:0] X[23:8] mux2
+XSL032 B[3]#8 W[7:0] 0#8 X[7:0] mux2
+XSL020 B[2]#4 X[31:28] X[27:24] Y[31:28] mux2
+XSL021 B[2]#24 X[27:4] X[23:0] Y[27:4] mux2
+XSL022 B[2]#4 X[3:0] 0#4 Y[3:0] mux2
+XSL010 B[1]#2 Y[31:30] Y[29:28] Z[31:30] mux2
+XSL011 B[1]#28 Y[29:2] Y[27:0] Z[29:2] mux2
+XSL012 B[1]#2 Y[1:0] 0#2 Z[1:0] mux2
+XSL000 B[0] Z[31] Z[30] SL[31] mux2
+XSL001 B[0]#30 Z[30:1] Z[29:0] SL[30:1] mux2
+XSL002 B[0] Z[0] 0 SL[0] mux2
+*Shift right arithmetic
+XSR040 B[4]#16 A[31:16] 0#16 P[31:16] mux2
+XSR041 B[4]#16 A[15:0] A[31:16] P[15:0] mux2
+XSR030 B[3]#8 P[31:24] 0#8 Q[31:24] mux2
+XSR031 B[3]#16 P[23:8] P[31:16] Q[23:8] mux2
+XSR032 B[3]#8 P[7:0] P[15:8] Q[7:0] mux2
+XSR020 B[2]#4 Q[31:28] 0#4 T[31:28] mux2
+XSR021 B[2]#24 Q[27:4] Q[31:8] T[27:4] mux2
+XSR022 B[2]#4 Q[3:0] Q[7:4] T[3:0] mux2
+XSR010 B[1]#2 T[31:30] 0#2 E[31:30] mux2
+XSR011 B[1]#28 T[29:2] T[31:4] E[29:2] mux2
+XSR012 B[1]#2 T[1:0] T[3:2] E[1:0] mux2
+XSR000 B[0] E[31] 0 SR[31] mux2
+XSR001 B[0]#30 E[30:1] E[31:2] SR[30:1] mux2
+XSR002 B[0] E[0] E[1] SR[0] mux2
+*shift right with sign extension
+XSRS040 B[4]#16 A[31:16] A[31]#16 PP[31:16] mux2
+XSRS041 B[4]#16 A[15:0] A[31:16] PP[15:0] mux2
+XSRS030 B[3]#8 PP[31:24] PP[31]#8 QQ[31:24] mux2
+XSRS031 B[3]#16 PP[23:8] PP[31:16] QQ[23:8] mux2
+XSRS032 B[3]#8 PP[7:0] PP[15:8] QQ[7:0] mux2
+XSRS020 B[2]#4 QQ[31:28] QQ[31]#4 TT[31:28] mux2
+XSRS021 B[2]#24 QQ[27:4] QQ[31:8] TT[27:4] mux2
+XSRS022 B[2]#4 QQ[3:0] QQ[7:4] TT[3:0] mux2
+XSRS010 B[1]#2 TT[31:30] TT[31]#2 EE[31:30] mux2
+XSRS011 B[1]#28 TT[29:2] TT[31:4] EE[29:2] mux2
+XSRS012 B[1]#2 TT[1:0] TT[3:2] EE[1:0] mux2
+XSRS000 B[0] EE[31] EE[31] SRA[31] mux2
+XSRS001 B[0]#30 EE[30:1] EE[31:2] SRA[30:1] mux2
+XSRS002 B[0] EE[0] EE[1] SRA[0] mux2
+*Operation logic
+Xlog ALUFN[0]#32 ALUFN[1]#32 SL[31:0] SR[31:0] 0#32 SRA[31:0] shift[31:0] mux4
+.ends
+
+.subckt alu ALUFN[5:0] A[31:0] B[31:0] alu[31:0] z v n
+Xad ALUFN[1:0] A[31:0] B[31:0] s[31:0] z v n arith
+Xbo ALUFN[3:0] A[31:0] B[31:0] boole[31:0] boole32
+Xsh ALUFN[1:0] A[31:0] B[4:0] shift[31:0] shift32
+Xcm ALUFN[2:1] z v n cmp[31:0] compare32
+Xmu ALUFN[4]#32 ALUFN[5]#32 s[31:0] boole[31:0] shift[31:0] cmp[31:0] alu[31:0] mux4 
+.ends
+
+
+
+
+
+

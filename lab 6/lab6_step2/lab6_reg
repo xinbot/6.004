@@ -1,0 +1,21 @@
+.subckt regfile clk werf wasel ra2sel ra[4:0] rb[4:0] rc[4:0] wdata[31:0] radata[31:0] rbdata[31:0]
+
+Xwasel_beta wasel#5 rc[4:0] vdd#4 0 wa[4:0] mux2
+
+Xand1 ra[4] ra[3] ra[2] ra[1] za1 and4
+Xand2 za1 ra[0] zao and2
+Xand3 ra2mux[4] ra2mux[3] ra2mux[2] ra2mux[1] y and4
+Xand4 y ra2mux[0] z_ra2mux and2
+
+Xr31a zao#32 adata[31:0] 0#32 radata[31:0] mux2
+Xr31ra2 z_ra2mux#32 bdata[31:0] 0#32 rbdata[31:0] mux2
+
+Xra2sel_mux ra2sel#5 rb[4:0] rc[4:0] ra2mux[4:0] mux2
+
+Xregfile
++ vdd 0 0 ra[4:0] adata[31:0] //A read port
++ vdd 0 0 ra2mux[4:0] bdata[31:0] //B read port
++ 0 clk werf wa[4:0] wdata[31:0] //write port
++ $memory width=32 nlocations=31
+
+.ends
