@@ -39,16 +39,16 @@
 
 ||| Interrupt vectors:
 
-. = VEC_RESET	| 0x80000000
-	BR(I_Reset)	| on Reset (start-up) 
-. = VEC_II		| 0x80000004
-	BR(I_IllOp)	| on Illegal Instruction (eg SVC) 
-. = VEC_CLK		| 0x80000008
-	BR(I_Clk)	| On clock interrupt 
-. = VEC_KBD		| 0x8000000C
-	BR(I_Kbd)	| on Keyboard interrupt 
-. = VEC_MOUSE	| 0x80000010
-	BR(I_Moe)	| on mouse interrupt 
+. = VEC_RESET
+	BR(I_Reset)	| on Reset (start-up)
+. = VEC_II
+	BR(I_IllOp)	| on Illegal Instruction (eg SVC)
+. = VEC_CLK
+	BR(I_Clk)	| On clock interrupt
+. = VEC_KBD
+	BR(I_Kbd)	| on Keyboard interrupt
+. = VEC_MOUSE
+	BR(I_Mse)	| on mouse interrupt
 
 ||| The following macro is the first instruction to be entered for each
 ||| asynchronous I/O interrupt handler.	 It adjusts XP (the interrupted
@@ -176,7 +176,7 @@ I_Wait:	LD(UserMState+(4*30), r0)	| Grab XP from saved MState,
 
 SVC_UUO:
 	LD(XP, -4, r0)		| The faulting instruction.
-	ANDC(r0,0x7,r0)		| Pick out low bits,
+	ANDC(r0,15,r0)		| Pick out low bits,
 	SHLC(r0,2,r0)		| make a word index,
 	LD(r0,SVCTbl,r0)	| and fetch the table entry.
 	JMP(r0)
@@ -189,6 +189,7 @@ SVCTbl:	UUO(HaltH)		| SVC(0): User-mode HALT instruction
 	UUO(WaitH)		| SVC(5): Wait(S) ,,, S in R3
 	UUO(SignalH)		| SVC(6): Signal(S), S in R3
 	UUO(YieldH)		| SVC(7): Yield()
+	UUO(MouseH)		| SVC(8): Mouse()
 
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ||| Keyboard handling
@@ -220,7 +221,7 @@ I_Kbd:	ENTER_INTERRUPT()		| Adjust the PC!
 	LD(UserMState, r0)		| restore r0, and
 	JMP(xp)				| and return to the user.
 
-WrChH:	LD(UserMState,r0)		| The user's 
+WrChH:	LD(UserMState,r0)		| The user's <R0>
 	WRCHAR()			| Write out the character,
 	BR(I_Rtn)			| then return
 
@@ -238,16 +239,27 @@ HexPrtH:
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ||| Mouse handling
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-Moe_State: LONG(0)  
-I_Moe:  ENTER_INTERRUPT() |Adjust th PC!
+Mse_State: LONG(-1)
+
+MouseH:
+	LD(Mse_State, r0)
+	ADDC(r0,1,r1)
+	BEQ(r1, I_Wait)
+	
+| mouse location ready, return it and clear the key buffer
+	LD(Mse_State, r0)		| Fetch character to return
+	ST(r0,UserMState)		| return it in R0.
+	SUBC(r31,1,r1)
+	ST(r1, Mse_State)		| Clear kbd buffer
+	BR(I_Rtn)		
+
+I_Mse:  ENTER_INTERRUPT() |Adjust th PC!
     ST(r0, UserMState)		| Save ONLY r0...
 	CLICK()		| Get the coordinate,
-	ST(r0,Moe_State)		| save its code.
+	ST(r0,Mse_State)		| save its code.
 	LD(UserMState, r0)		| restore r0, and
- 	.breakpoint
-	JMP(XP)
+	JMP(XP)					| return to the user.
 
-	
 
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ||| Timesharing: 3-process round-robin scheduler
@@ -526,7 +538,10 @@ WrEnd:
 .macro HexPrt()	SVC(4)		| Hex Print the value in R0.
 
 .macro Yield()	SVC(7)		| Give up remaining quantum
-	
+
+.macro Mouse()  SVC(8)      | Get the most recent mouse click 
+							| coordinate information
+
 ||| Semaphore macros.
 ||| Wait(S) waits on semaphore S; Signal(S) signals on S.
 ||| Both preserve all registers, by pushing & popping R3.
@@ -731,6 +746,7 @@ P1Stack: STORAGE(256)		| Stack for process 2.
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 P2Start:
+	Mouse()
 	LD(Count3, r0)		| Another quantum, incr count3.
 	ADDC(r0,1,r0)
 	ST(r0,Count3)
