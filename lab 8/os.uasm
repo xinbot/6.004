@@ -221,7 +221,7 @@ I_Kbd:	ENTER_INTERRUPT()		| Adjust the PC!
 	LD(UserMState, r0)		| restore r0, and
 	JMP(xp)				| and return to the user.
 
-WrChH:	LD(UserMState,r0)		| The user's <R0>
+WrChH:	LD(UserMState,r0)		| The user's 
 	WRCHAR()			| Write out the character,
 	BR(I_Rtn)			| then return
 
@@ -253,7 +253,7 @@ MouseH:
 	ST(r1, Mse_State)		| Clear kbd buffer
 	BR(I_Rtn)		
 
-I_Mse:  ENTER_INTERRUPT() |Adjust th PC!
+I_Mse:  ENTER_INTERRUPT() | Adjust th PC!
     ST(r0, UserMState)		| Save ONLY r0...
 	CLICK()		| Get the coordinate,
 	ST(r0,Mse_State)		| save its code.
@@ -316,7 +316,7 @@ Sched1:	ST(r0, CurProc)			| Here's the new process;
 	POP(LP)
 	JMP(LP)				| and return to caller.
 
-| Copy a 31-word MState structure from the address in <r0> to that in <r1>
+| Copy a 31-word MState structure from the address in  to that in 
 | Trashes r2, leaves r0-r1 unchanged.
 .macro CM(N) LD(r0, N*4, r2)  ST(r2, N*4, r1)	| Auxiliary macro
 CopyMState:
@@ -551,16 +551,16 @@ WrEnd:
 ||| Both preserve all registers, by pushing & popping R3.
 
 .macro Wait(S) {
-	PUSH(r3)		| Save old <r3>,
+	PUSH(r3)		| Save old ,
 	LDR(S,r3)		| put semaphore address into r3
 	SVC(5)			| Wait on semaphore whose adr is in R3
-	POP(r3) }		| and restore former <r3>
+	POP(r3) }		| and restore former 
 
 .macro Signal(S) {
-	PUSH(r3)		| Save old <r3>,
+	PUSH(r3)		| Save old ,
 	LDR(S,r3)		| put semaphore address into r3
 	SVC(6)			| Signal on semaphore whose adr is in R3
-	POP(r3) }		| and restore former <r3>
+	POP(r3) }		| and restore former 
 
 ||| Allocate a semaphore: used like
 |||    name:   semaphore(size)
@@ -573,7 +573,11 @@ WrEnd:
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 Prompt:	semaphore(1)		| To keep us from typing next prompt
-				| while P1 is typing previous output.
+							| while P1 is typing previous output.
+							
+Click: semaphore(0)			| To keep us from printing coordinate information
+							| while P1 is typing previous output.
+
 P0Start:WrMsg()
 	.text "Start typing, Bunky.\n\n"
 
@@ -585,11 +589,22 @@ P0Read:	Wait(Prompt)		| Wait until P1 has caught up...
 	 WrMsg()		|  the remainder.
 	.text "> "
 
+	Signal(Click)
 
 	LD(P0LinP, r3)		| ...then read a line into buffer...
 
-P0RdCh: GetKey()		| read next character,
+P0RdCha: GetKey()		| read next character,
+	Wait(Click)
+	WrCh()			| echo back to user
+	CALL(UCase)		| Convert it to upper case,
+	ST(r0,0,r3)		| Store it in buffer.
+	ADDC(r3,4,r3)		| Incr pointer to next char...
 
+	CMPEQC(r0,0xA,r1)	| End of line?
+	BT(r1,P0Send)		| yup, transmit buffer to P1
+
+
+P0RdCh: GetKey()		| read next character,
 	WrCh()			| echo back to user
 	CALL(UCase)		| Convert it to upper case,
 	ST(r0,0,r3)		| Store it in buffer.
@@ -634,7 +649,7 @@ UCase:	PUSH(r1)
 UCase1: POP(r1)
 	RTN()
 
-| Auxilliary routine: Test if <r0> is a vowel; boolean into r1.
+| Auxilliary routine: Test if  is a vowel; boolean into r1.
 VowelP: CMPEQC(r0,'A',r1)	| Sorta brute force...
 	BT(r1,Vowel1)
 	CMPEQC(r0,'E',r1)	BT(r1,Vowel1)
@@ -660,7 +675,7 @@ OUT:	LONG(0)			| OUT pointer: index into FIFO
 Chars:	semaphore(0)		| Flow-control semaphore 1
 Holes:	semaphore(FIFOSIZE)	| Flow-control semaphore 2
 
-||| Send: put <r0> into fifo.
+||| Send: put  into fifo.
 Send:	PUSH(r1)		| Save some regs...
 	PUSH(r2)
 	Wait(Holes)		| Wait for space in buffer...
@@ -765,6 +780,7 @@ Count3: LONG(0)
 
 P3Start:
 	Mouse()
+	Wait(Click)
 	
 	MOVE(r0, r1)
 	WrMsg()
@@ -781,6 +797,7 @@ P3Start:
 	HexPrt()
 	WrMsg()
 	.text "\n"
+	Signal(Click)
 	BR(P3Start)
 
 P3Stack: STORAGE(256)
